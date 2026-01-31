@@ -1,9 +1,9 @@
-# ProfilePage
+# Profile Page
 
-ProfilePage is an iOS UI prototype that replicates a modern social-media profile screen with a sticky header and horizontally paged content (like TikTok or Instagram).  
+Profile Page is an iOS UI prototype of a modern social-media profile screen with a sticky header and horizontally paged content (like TikTok or Instagram).  
 The project focuses on scroll synchronization, gesture handling, and custom container controller behavior using UIKit.
 
-The app is implemented for iOS 15+ and is intended as a UI demonstration rather than a production app.
+Implemented for iOS 15+ and intended as a UI demonstration rather than a production app.
 
 ## Demo
 
