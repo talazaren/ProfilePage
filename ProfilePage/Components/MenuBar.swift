@@ -10,7 +10,7 @@ import UIKit
 final class MenuBar: UIView {
     weak var delegate: ProfileViewControllerDelegate?
 
-    private let tabs = ["Посты", "Лайки", "Дизлайки"]
+    private let tabs = ["Posts", "Likes", "Reposts"]
     private let menuCell = "menuCell"
     private weak var indicatorView: UIView?
     private var trackView: UIView!
@@ -66,7 +66,7 @@ final class MenuBar: UIView {
             track.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
             track.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
             track.bottomAnchor.constraint(equalTo: bottomAnchor),
-            track.heightAnchor.constraint(equalToConstant: 1)
+            track.heightAnchor.constraint(equalToConstant: 1.5)
         ])
 
         let indicator = GradientIndicatorView()
@@ -160,7 +160,7 @@ final class MenuCell: UICollectionViewCell {
     let label: GradientLabel = {
         let label = GradientLabel()
         label.textAlignment = .center
-        label.font = .systemFont(ofSize: 12, weight: .medium)
+        label.font = .systemFont(ofSize: 16, weight: .medium)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()

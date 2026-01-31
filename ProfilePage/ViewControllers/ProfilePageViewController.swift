@@ -10,6 +10,7 @@ import UIKit
 final class ProfilePageViewController: UIPageViewController {
     weak var profileDelegate: ProfileViewControllerDelegate?
     private weak var scrollView: UIScrollView?
+    private var constants: Constants = Constants.shared
 
     init(profileDelegate: ProfileViewControllerDelegate? = nil) {
         super.init(transitionStyle: .scroll, navigationOrientation: .horizontal, options: nil)
@@ -41,7 +42,7 @@ final class ProfilePageViewController: UIPageViewController {
         
         switch gesture.state {
         case .began:
-            if let profileDelegate, profileDelegate.lastContentOffset <= -Constants.topOffset, location.y < abs(profileDelegate.lastContentOffset) {
+            if let profileDelegate, profileDelegate.lastContentOffset <= -constants.minTopOffset, location.y < abs(profileDelegate.lastContentOffset) {
                 scrollView.isScrollEnabled = false
             }
         case .ended, .cancelled, .failed:

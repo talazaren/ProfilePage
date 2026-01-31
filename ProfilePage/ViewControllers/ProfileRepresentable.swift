@@ -16,7 +16,7 @@ struct ProfileViewRepresentable: UIViewControllerRepresentable {
         vc.viewControllers = [
             GridViewController(color: .systemRed, numberOfItems: 30),
             GridViewController(color: .systemBlue, numberOfItems: 8),
-            GridViewController(color: .systemCyan, numberOfItems: 5)
+            GridViewController(color: .systemCyan, numberOfItems: 40)
         ]
         
         let navController = UINavigationController(rootViewController: vc)

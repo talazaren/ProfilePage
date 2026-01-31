@@ -13,7 +13,6 @@ protocol ScrollableViewController: AnyObject {
     
     func updateContentInset(top: CGFloat)
     func setContentOffset(_ offset: CGFloat)
-    func setContentOffsetWithoutDelegate(_ offset: CGFloat)
 }
 
 final class GridViewController: UIViewController, ScrollableViewController {
@@ -25,7 +24,7 @@ final class GridViewController: UIViewController, ScrollableViewController {
     private var shouldNotifyDelegate = true
     private var isFirst = true
     private var pendingOffset: CGFloat?
-    
+    private let constant: Constants = Constants.shared
     
     init(color: UIColor, numberOfItems: Int) {
         super.init(nibName: nil, bundle: nil)
@@ -39,8 +38,8 @@ final class GridViewController: UIViewController, ScrollableViewController {
     
     private(set) lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
-        layout.minimumInteritemSpacing = Constants.spacing
-        layout.minimumLineSpacing = Constants.spacing
+        layout.minimumInteritemSpacing = constant.spacing
+        layout.minimumLineSpacing = constant.spacing
         layout.sectionInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         
         let cv = UICollectionView(frame: .zero, collectionViewLayout: layout)
@@ -50,7 +49,6 @@ final class GridViewController: UIViewController, ScrollableViewController {
         cv.backgroundColor = .white
         cv.register(GridCell.self, forCellWithReuseIdentifier: GridCell.identifier)
         cv.alwaysBounceVertical = true
-        cv.backgroundColor = .gray
         return cv
     }()
     
@@ -62,16 +60,7 @@ final class GridViewController: UIViewController, ScrollableViewController {
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        let contentHeight = collectionView.collectionViewLayout.collectionViewContentSize.height
-        let visibleHeight = collectionView.bounds.height
-        let targetHeight = visibleHeight - Constants.headerHeight
-        
-        if contentHeight < targetHeight {
-            let extra = visibleHeight - contentHeight - Constants.topOffset
-            collectionView.contentInset.bottom = extra
-        } else {
-            collectionView.contentInset.bottom = 20
-        }
+        setupBottomInset()
         
         guard isFirst else { return }
         
@@ -84,6 +73,19 @@ final class GridViewController: UIViewController, ScrollableViewController {
                 self?.shouldNotifyDelegate = true
                 self?.isFirst = false
             }
+        }
+    }
+    
+    private func setupBottomInset() {
+        let contentHeight = collectionView.collectionViewLayout.collectionViewContentSize.height
+        let visibleHeight = collectionView.bounds.height
+        let targetHeight = visibleHeight - constant.headerHeight
+        
+        if contentHeight < targetHeight {
+            let extra = visibleHeight - contentHeight - (-constant.minTopOffset)
+            collectionView.contentInset.bottom = extra
+        } else {
+            collectionView.contentInset.bottom = 20
         }
     }
     
@@ -104,17 +106,11 @@ final class GridViewController: UIViewController, ScrollableViewController {
     }
     
     func setContentOffset(_ offset: CGFloat) {
-        shouldNotifyDelegate = true
-        collectionView.contentOffset = CGPoint(x: 0, y: offset)
-    }
-    
-    func setContentOffsetWithoutDelegate(_ offset: CGFloat) {
         pendingOffset = offset
         
         if collectionView.bounds.width > 0 {
             shouldNotifyDelegate = false
             collectionView.contentOffset = CGPoint(x: 0, y: offset)
-            
             DispatchQueue.main.async { [weak self] in
                 self?.shouldNotifyDelegate = true
             }
@@ -136,9 +132,9 @@ extension GridViewController: UICollectionViewDataSource {
 
 extension GridViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let totalSpacing = Constants.spacing * CGFloat(Constants.columns - 1) + 32
-        let width = (collectionView.bounds.width - totalSpacing) / CGFloat(Constants.columns)
-        return CGSize(width: width, height: Constants.cellHeight)
+        let totalSpacing = constant.spacing * CGFloat(constant.columns - 1) + 32
+        let width = (collectionView.bounds.width - totalSpacing) / CGFloat(constant.columns)
+        return CGSize(width: width, height: constant.cellHeight)
     }
 }
 
@@ -152,3 +148,4 @@ extension GridViewController: UIScrollViewDelegate {
         delegate?.childDidScroll(scrollView, offset: scrollView.contentOffset.y)
     }
 }
+

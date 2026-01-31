@@ -21,32 +21,28 @@ protocol ProfileViewControllerDelegate: AnyObject {
 }
 
 final class ProfileViewController: UIViewController, UIPageViewControllerDataSource, UIPageViewControllerDelegate, ProfileViewControllerDelegate {
-    var viewControllers: [UIViewController] = [] {
-        didSet {
-            setupViewControllers()
-        }
-    }
+    private let constant: Constants = Constants.shared
+    private var headerTopConstraint: NSLayoutConstraint?
+    private var currentOffset: CGFloat = 0
+    private var isPaging: Bool = false
+    private var hasTriggeredInitialOffset = false
+    private var isSetViewControllers: Bool = false
     
-    lazy var tabBar: MenuBar = {
+    var lastContentOffset: CGFloat = 0
+    var viewControllers: [UIViewController] = []
+    
+    
+// MARK: - UI Elements
+    private lazy var tabBar: MenuBar = {
         let mb = MenuBar()
         mb.delegate = self
         return mb
     }()
     
-    private var headerHeightConstraint: NSLayoutConstraint?
-    private var headerTopConstraint: NSLayoutConstraint?
-    private var currentOffset: CGFloat = 0
-    private var isPaging: Bool = false
-    
-    var lastContentOffset: CGFloat = 0
-    
-    
-    // MARK: - UI Elements
     private lazy var headerContainerView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.clipsToBounds = true
-        view.backgroundColor = .systemGreen
         view.isUserInteractionEnabled = false
         return view
     }()
@@ -59,8 +55,19 @@ final class ProfileViewController: UIViewController, UIPageViewControllerDataSou
         return vc
     }()
     
+    private let userInfoView: UserInfoView = {
+        let userInfoView = UserInfoView()
+        userInfoView.configure(
+            avatarURL: "https://i.natgeofe.com/n/548467d8-c5f1-4551-9f58-6817a8d2c45e/NationalGeographic_2572187_16x9.jpg?w=1200",
+            name: "Tim Cook",
+            nickname: "cooktim"
+        )
+        userInfoView.translatesAutoresizingMaskIntoConstraints = false
+        return userInfoView
+    }()
+
     
-    // MARK: - Lifecycle
+// MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
@@ -74,7 +81,7 @@ final class ProfileViewController: UIViewController, UIPageViewControllerDataSou
         navigationController?.navigationBar.scrollEdgeAppearance = appearance
         
         let titleLabel = UILabel()
-        titleLabel.text = "Профиль"
+        titleLabel.text = "Profile"
         titleLabel.textColor = .black
         titleLabel.font = .systemFont(ofSize: 20, weight: .semibold)
         titleLabel.textAlignment = .center
@@ -82,9 +89,20 @@ final class ProfileViewController: UIViewController, UIPageViewControllerDataSou
         
         setupUI()
     }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+
+        constant.setHeaderHeight(headerContainerView.frame.height)
+        constant.setNavBarHeight(view.layoutMargins.top)
+        constant.setMinTopOffset(-(constant.navBarHeight + constant.tabBarHeight + constant.padding))
+        constant.setMaxTopOffset(constant.headerHeight + constant.navBarHeight + constant.tabBarHeight + constant.padding)
+        
+        setupViewControllers()
+    }
+
     
-    
-    // MARK: - Setup
+// MARK: - Setup
     private func setupUI() {
         addChild(pageViewController)
         view.addSubview(pageViewController.view)
@@ -93,13 +111,13 @@ final class ProfileViewController: UIViewController, UIPageViewControllerDataSou
         view.addSubview(headerContainerView)
         view.addSubview(tabBar)
         tabBar.translatesAutoresizingMaskIntoConstraints = false
+        headerContainerView.addSubview(userInfoView)
         
         setupConstraints()
     }
     
     private func setupConstraints() {
-        headerTopConstraint = headerContainerView.topAnchor.constraint(equalTo: view.topAnchor, constant: 0)
-        headerHeightConstraint = headerContainerView.heightAnchor.constraint(equalToConstant: Constants.headerHeight)
+        headerTopConstraint = headerContainerView.topAnchor.constraint(equalTo: view.layoutMarginsGuide.topAnchor, constant: 0)
         
         NSLayoutConstraint.activate([
             pageViewController.view.topAnchor.constraint(equalTo: view.topAnchor),
@@ -108,20 +126,26 @@ final class ProfileViewController: UIViewController, UIPageViewControllerDataSou
             pageViewController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             
             headerTopConstraint!,
-            headerHeightConstraint!,
             headerContainerView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             headerContainerView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             
             tabBar.topAnchor.constraint(equalTo: headerContainerView.bottomAnchor),
             tabBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tabBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tabBar.heightAnchor.constraint(equalToConstant: Constants.tabBarHeight)
+            tabBar.heightAnchor.constraint(equalToConstant: constant.tabBarHeight),
+
+            userInfoView.topAnchor.constraint(equalTo: headerContainerView.topAnchor),
+            userInfoView.bottomAnchor.constraint(equalTo: headerContainerView.bottomAnchor),
+            userInfoView.leadingAnchor.constraint(equalTo: headerContainerView.leadingAnchor),
+            userInfoView.trailingAnchor.constraint(equalTo: headerContainerView.trailingAnchor)
         ])
     }
     
     private func setupViewControllers() {
-        guard !viewControllers.isEmpty else { return }
-        lastContentOffset = -(Constants.headerHeight - Constants.navBarHeight + Constants.tabBarHeight)
+        guard !viewControllers.isEmpty, !isSetViewControllers else { return }
+        defer { isSetViewControllers = true }
+        
+        lastContentOffset = -(constant.headerHeight + constant.tabBarHeight + constant.padding)
         
         for vc in viewControllers {
             if let scrollVC = vc as? ScrollableViewController {
@@ -137,7 +161,7 @@ final class ProfileViewController: UIViewController, UIPageViewControllerDataSou
         )
     }
     
-    // MARK: - Actions
+// MARK: - Actions
     @objc private func tabChanged(_ sender: UISegmentedControl) {
         let index = sender.selectedSegmentIndex
         guard index < viewControllers.count else { return }
@@ -151,16 +175,9 @@ final class ProfileViewController: UIViewController, UIPageViewControllerDataSou
         )
     }
     
-    func didChangePage(to index: Int) {
-        if let scrollVC = viewControllers[index] as? ScrollableViewController {
-            scrollVC.setContentOffset(lastContentOffset)
-        }
-    }
-    
     func pageViewController(_ pageViewController: UIPageViewController, willTransitionTo pendingViewControllers: [UIViewController]) {
         isPaging = true
     }
-    
     
     func pageViewController(_ pageViewController: UIPageViewController, viewControllerBefore viewController: UIViewController) -> UIViewController? {
         guard let index = viewControllers.firstIndex(of: viewController), index > 0 else {
@@ -182,26 +199,36 @@ final class ProfileViewController: UIViewController, UIPageViewControllerDataSou
               let index = viewControllers.firstIndex(of: currentVC) else {
             return
         }
-        
+        resetInitialTrigger()
         tabBar.select(index: index, animated: true)
-        didChangePage(to: index)
     }
     
     func childDidScroll(_ scrollView: UIScrollView, offset: CGFloat) {
         guard !isPaging else { return }
         
-        let contentInsetTop = Constants.headerHeight + Constants.tabBarHeight + 14
-        let maxOffset = -Constants.headerHeight + Constants.navBarHeight + 14
-        let adjustedOffset = offset + contentInsetTop
+        let maxOffset = -constant.headerHeight
+        let adjustedOffset = offset + constant.maxTopOffset
         let newHeaderOffset = min(max(-adjustedOffset, maxOffset), 0)
         
         headerTopConstraint?.constant = newHeaderOffset
         lastContentOffset = offset
         
+        
+        if offset >= constant.minTopOffset && !hasTriggeredInitialOffset {
+            hasTriggeredInitialOffset = true
+            for vc in viewControllers {
+                if let scrollVC = vc as? ScrollableViewController,
+                   scrollVC.collectionView != scrollView {
+                    scrollVC.setContentOffset(constant.minTopOffset)
+                }
+            }
+        }
+        
         for vc in viewControllers {
             if let scrollVC = vc as? ScrollableViewController,
-               scrollVC.collectionView != scrollView {
-                scrollVC.setContentOffsetWithoutDelegate(offset)
+               scrollVC.collectionView != scrollView, offset < constant.minTopOffset {
+                scrollVC.setContentOffset(offset)
+                resetInitialTrigger()
             }
         }
     }
@@ -231,5 +258,9 @@ final class ProfileViewController: UIViewController, UIPageViewControllerDataSou
 
     func setIsPaging(_ isPaging: Bool) {
         self.isPaging = isPaging
+    }
+    
+    private func resetInitialTrigger() {
+        hasTriggeredInitialOffset = false
     }
 }
