@@ -8,7 +8,7 @@ The app is implemented for iOS 15+ and is intended as a UI demonstration rather 
 ## Demo
 
 <p align="center">
-  <img src="./demo.gif" width="360" />
+  <img src="./demo.gif" width="260" />
 </p>
 
 ---
