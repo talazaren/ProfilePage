@@ -4,7 +4,12 @@ ProfilePage is an iOS UI prototype that replicates a modern social-media profile
 The project focuses on scroll synchronization, gesture handling, and custom container controller behavior using UIKit.
 
 The app is implemented for iOS 15+ and is intended as a UI demonstration rather than a production app.
-![ProfilePage Demo](./demo.gif)
+
+## Demo
+
+<p align="center">
+  <img src="./demo.gif" width="360" />
+</p>
 
 ---
 
