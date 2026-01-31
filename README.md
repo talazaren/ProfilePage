@@ -7,8 +7,8 @@ Implemented for iOS 15+ and intended as a UI demonstration rather than a product
 
 ## Demo
 
-<p align="center">
-  <img src="./demo.gif" width="260" />
+<p align="left">
+  <img src="./demo.gif" width="240" />
 </p>
 
 ---
@@ -25,7 +25,7 @@ The profile screen is built around a custom container view controller that coord
 ---
 
 ## View Hierarchy
-UINavigationController
+
 ```text
 UINavigationController
  └── ProfileViewController
