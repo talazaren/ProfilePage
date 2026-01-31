@@ -15,7 +15,7 @@ import SwiftUI
 protocol ProfileViewControllerDelegate: AnyObject {
     var lastContentOffset: CGFloat { get }
     
-    func childDidScroll(_ scrollView: UIScrollView, offset: CGFloat)
+    func gridDidScroll(_ scrollView: UIScrollView, offset: CGFloat)
     func scrollToMenuIndex(_ index: Int)
     func setIsPaging(_ isPaging: Bool)
 }
@@ -203,7 +203,7 @@ final class ProfileViewController: UIViewController, UIPageViewControllerDataSou
         tabBar.select(index: index, animated: true)
     }
     
-    func childDidScroll(_ scrollView: UIScrollView, offset: CGFloat) {
+    func gridDidScroll(_ scrollView: UIScrollView, offset: CGFloat) {
         guard !isPaging else { return }
         
         let maxOffset = -constant.headerHeight

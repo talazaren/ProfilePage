@@ -145,7 +145,7 @@ extension GridViewController: UIScrollViewDelegate {
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         guard shouldNotifyDelegate else { return }
-        delegate?.childDidScroll(scrollView, offset: scrollView.contentOffset.y)
+        delegate?.gridDidScroll(scrollView, offset: scrollView.contentOffset.y)
     }
 }
 
