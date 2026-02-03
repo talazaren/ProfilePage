@@ -56,6 +56,10 @@ final class MenuBar: UIView {
     }
     
     private func setupHorizontalBar() {
+        guard !tabs.isEmpty else {
+            return
+        }
+
         let track = UIView()
         track.backgroundColor = UIColor.systemGray4
         track.translatesAutoresizingMaskIntoConstraints = false
@@ -80,7 +84,7 @@ final class MenuBar: UIView {
             indicatorLeftConstraint,
             indicator.topAnchor.constraint(equalTo: track.topAnchor),
             indicator.bottomAnchor.constraint(equalTo: track.bottomAnchor),
-            indicator.widthAnchor.constraint(equalTo: track.widthAnchor, multiplier: 1 / 3)
+            indicator.widthAnchor.constraint(equalTo: track.widthAnchor, multiplier: 1 / CGFloat(tabs.count))
         ])
     }
     
@@ -295,7 +299,7 @@ final class GradientLabel: UILabel {
         
         if isGradientEnabled {
             let gradient = getGradientLayer(bounds: bounds)
-            textColor = UIView().gradientColor(bounds: bounds, gradientLayer: gradient)
+            textColor = gradientColor(bounds: bounds, gradientLayer: gradient)
         } else {
             textColor = UIColor(named: "turGray") ?? .gray
         }
