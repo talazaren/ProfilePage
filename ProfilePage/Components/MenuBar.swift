@@ -74,7 +74,7 @@ final class MenuBar: UIView {
         track.addSubview(indicator)
         
         indicatorView = indicator
-        indicatorLeftConstraint = indicator.leftAnchor.constraint(equalTo: track.leftAnchor)
+        indicatorLeftConstraint = indicator.leadingAnchor.constraint(equalTo: track.leadingAnchor)
 
         NSLayoutConstraint.activate([
             indicatorLeftConstraint,
