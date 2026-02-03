@@ -44,8 +44,12 @@ final class MenuBar: UIView {
     private func setupUI() {
         addSubview(collectionView)
         
-        collectionView.contentInset.left = 16
-        collectionView.contentInset.right = 16
+        collectionView.contentInset = UIEdgeInsets(
+            top: 0,
+            left: Constants.horizontalSpacing,
+            bottom: 0,
+            right: Constants.horizontalSpacing
+        )
         
         NSLayoutConstraint.activate([
             collectionView.topAnchor.constraint(equalTo: topAnchor),
@@ -115,6 +119,14 @@ final class MenuBar: UIView {
     }
 }
 
+private extension MenuBar {
+
+    enum Constants {
+        static var horizontalSpacing: CGFloat = 16
+    }
+
+}
+
 
 extension MenuBar: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -132,7 +144,13 @@ extension MenuBar: UICollectionViewDataSource, UICollectionViewDelegateFlowLayou
     }
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        CGSize(width: (bounds.width - 32) / CGFloat(tabs.count), height: bounds.height)
+        guard !tabs.isEmpty else {
+            return .zero
+        }
+
+        let width = (bounds.width - Constants.horizontalSpacing * 2) / CGFloat(tabs.count)
+
+        return CGSize(width: width, height: bounds.height)
     }
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
